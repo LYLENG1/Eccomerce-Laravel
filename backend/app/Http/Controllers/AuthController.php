@@ -1,5 +1,6 @@
 <?php
 
+// app/Http/Controllers/AuthController.php
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -8,31 +9,26 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
-{
-    // User Registration
+{    
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'sometimes|string'
+            'role' => 'required|string|in:admin,customer',
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => $request->role ?? 'user'
+            'role' => $request->role,
         ]);
 
-        return response()->json([
-            'message' => 'User registered successfully',
-            'user' => $user
-        ], 201);
+        return response()->json(['message' => 'User registered successfully', 'user' => $user], 201);
     }
 
-    // User Login
     public function login(Request $request)
     {
         $request->validate([
@@ -50,20 +46,12 @@ class AuthController extends Controller
 
         $token = $user->createToken('api-token')->plainTextToken;
 
-        return response()->json([
-            'message' => 'Logged in successfully',
-            'token' => $token,
-            'user' => $user
-        ]);
+        return response()->json(['message' => 'Logged in successfully', 'token' => $token, 'user' => $user]);
     }
 
-    // User Logout
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Logged out successfully'
-        ]);
+        return response()->json(['message' => 'Logged out successfully']);
     }
 }

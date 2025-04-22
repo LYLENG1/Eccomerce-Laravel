@@ -33,11 +33,22 @@ class CategoryController extends Controller
     }
 
     public function update(Request $request, $id)
-    {
-        $category = Category::findOrFail($id);
-        $category->update($request->all());
-        return response()->json($category, 200);
-    }
+{
+    $category = Category::findOrFail($id);
+
+    $request->validate([
+        'name' => 'sometimes|required|string|max:255',
+        'status' => 'sometimes|required|in:available,not-available'
+    ]);
+
+    $category->update($request->only(['name', 'status']));
+
+    return response()->json([
+        'message' => 'Category updated successfully!',
+        'category' => $category
+    ], 200);
+}
+
 
     public function destroy($id)
     {

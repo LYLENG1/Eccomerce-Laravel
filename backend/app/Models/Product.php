@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
         'category_id',
         'brand_id',
@@ -19,15 +16,21 @@ class Product extends Model
         'image',
     ];
 
-    // Relationship with Category
+    protected $appends = ['image_url'];
+
     public function category()
     {
         return $this->belongsTo(Category::class);
     }
 
-    // Relationship with Brand
     public function brand()
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function getImageUrlAttribute()
+    {
+        // Ensure the full URL is generated
+        return $this->image ? asset('storage/' . $this->image) : null;
     }
 }
